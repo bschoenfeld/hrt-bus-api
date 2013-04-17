@@ -1,24 +1,34 @@
 from datetime import datetime, timedelta
-from pymongo import Connection, GEO2D, ASCENDING
+from pymongo import Connection, GEO2D
 
 class HRTDatabase:
-	def __init__(self, uri, dbName):
+	def __init__(self, uri):
 		self.client = Connection(uri)
-		self.db = self.client[dbName]
+		self.database = self.client.hrt
+
+	def removeOldGTFS(self, date):
+		print "Removing Old GTFS Data"
+		collectionPrefix = self.genCollectionName('', date)
+		for collection in self.database.collection_names():
+			if collection.find('_') != -1 and (not collection.endswith(collectionPrefix)):
+				self.database.drop_collection(collection)
 	
 	def insertGTFS(self, data, date):
-		self.db['gtfs'].remove({"arrival_time": {"$gte": date, "$lt": date + timedelta(days=1)}})
-		self.db['gtfs'].insert(data)
+		self.insertData(self.genCollectionName('gtfs_', date), data)
 	
-	def removeOldGTFS(self, date):
-		self.db['gtfs'].remove({"arrival_time": {"$lt": date}})
+	def insertStops(self, data, date):
+		collectionName = self.genCollectionName('stops_', date)
+		self.insertData(collectionName, data)
+		self.database[collectionName].ensure_index( [('location', GEO2D)] )
 	
-	def insertStops(self, data):
-		self.db['stops'].remove()
-		self.db['stops'].insert(data)
-		self.db['stops'].ensure_index( [('location', GEO2D)] )
+	def insertRoutes(self, data, date):
+		self.insertData(self.genCollectionName('routes_', date), data)
 	
-	def insertRoutes(self, data):
-		self.db['routes'].remove()
-		self.db['routes'].insert(data)
+	def genCollectionName(self, prefix, date):
+		return prefix + date.strftime('%Y%m%d')
+	
+	def insertData(self, collectionName, data):
+		if len(data) > 0:
+			self.database[collectionName].remove()
+			self.database[collectionName].insert(data)
 	

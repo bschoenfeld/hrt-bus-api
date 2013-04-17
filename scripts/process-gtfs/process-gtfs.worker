@@ -2,7 +2,6 @@ runtime 'python'
 exec "process-gtfs.py"
 
 pip "pymongo"
-pip "pytz"
 
 file "HRTDatabase.py"
 file "config.py"
