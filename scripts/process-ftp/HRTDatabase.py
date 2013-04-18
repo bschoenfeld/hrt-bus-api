@@ -2,9 +2,9 @@ from datetime import datetime, timedelta
 from pymongo import Connection
 
 class HRTDatabase:
-	def __init__(self, uri):
+	def __init__(self, uri, db):
 		self.client = Connection(uri)
-		self.database = self.client.hrt
+		self.database = self.client[db]
 	
 	# get bus route mappings that are not more than 30 minutes old
 	def getBusRouteMappings(self):
