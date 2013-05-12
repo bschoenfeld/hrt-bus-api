@@ -69,7 +69,7 @@ $(function(){
 		},
 		
 		showGeolocationError: function(error) {
-			alert('Geolocation Error: ' + error);
+			alert('Geolocation Error: ' + error.message);
 		}
 	});
 	
