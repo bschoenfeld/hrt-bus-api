@@ -23,6 +23,22 @@ class HRTDatabase:
 	
 	def insertRoutes(self, data, date):
 		self.insertData(self.genCollectionName('routes_', date), data)
+		
+	def insertDestinations(self, data, date):
+		self.insertData(self.genCollectionName('destinations_', date), data)
+	
+	def getStopName(self, stopId, date):
+		collectionName = self.genCollectionName('stops_', date)
+		stop = self.database[collectionName].find_one({"stopId": stopId})
+		return stop['stopName']
+	
+	def getFinalStops(self, date):
+		collectionName = self.genCollectionName('gtfs_', date)
+		finalStops = self.database[collectionName].aggregate([ { "$group":
+																	{ "_id": "$trip_id", 
+																 	  "stopId": { "$last": "$stop_id" }, 
+																	  "sequence": { "$last": "$stop_sequence" } } } ])
+		return finalStops['result']
 	
 	def genCollectionName(self, prefix, date):
 		return prefix + date.strftime('%Y%m%d')
