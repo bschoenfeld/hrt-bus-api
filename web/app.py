@@ -32,7 +32,12 @@ def index():
 @app.route('/busfinder/<path:view>/')
 def busfinder(view=None):
 	return render_template('busfinder.html')
-	
+
+@app.route('/busfinder2/')
+@app.route('/busfinder2/<path:view>/')
+def busfinder(view=None):
+	return render_template('busfinder2.html')	
+
 @app.route('/gtfs/trip_update/')
 def tripUpdate():
 	# PROTOCAL BUFFER!!!  https://developers.google.com/protocol-buffers/docs/pythontutorial
@@ -204,6 +209,8 @@ def getBusesAtStop(stopId):
 				break
 			except KeyError:
 				pass
+		stop.pop('_id')
+		stop.pop('all_trip_ids')
 	return json.dumps(scheduledStops, default=dthandler)
 
 if __name__ == '__main__':
